@@ -5,31 +5,47 @@ import { useAuth } from "../hooks/useAuth";
 const CommentBox: React.FC = () => {
   const { user } = useAuth();
   const [comments, setComments] = useState<any[]>([]);
-  const [text, setText] = useState("");
+  const [commentText, setCommentText] = useState("");
+  const [mapLocation, setMapLocation] = useState("Unknown");
 
   useEffect(() => {
     const fetchComments = async () => {
       try {
         const res = await pb
           .collection("comments")
-          .getFullList(50, { sort: "-created" });
+          // Expand the user relation to show the user's email/name if configured
+          .getFullList(50, { sort: "-created", expand: "user" });
         setComments(res as any);
       } catch (e) {
-        // ignore
+        console.error("Failed to fetch comments", e);
       }
     };
     fetchComments();
+
+    // Subscribe to realtime changes
+    pb.collection("comments").subscribe("*", function (e) {
+      if (e.action === "create") {
+        setComments((prev) => [e.record, ...prev]);
+      }
+    });
+
+    return () => {
+      pb.collection("comments").unsubscribe("*");
+    };
   }, []);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return alert("Please sign in");
     try {
-      const rec = await pb
-        .collection("comments")
-        .create({ text, user: user.id });
-      setComments((prev) => [rec, ...prev]);
-      setText("");
+      // Create new record with specific fields based on user request
+      await pb.collection("comments").create({
+        commentText: commentText,
+        mapLocation: mapLocation || "General",
+        user: user.id,
+      });
+      // Realtime subscription will handle the UI update
+      setCommentText("");
     } catch (e: any) {
       alert(e.message || "Failed");
     }
@@ -39,19 +55,34 @@ const CommentBox: React.FC = () => {
     <div className="comment-box">
       <h4>Comments</h4>
       <form onSubmit={submit}>
+        <div style={{ marginBottom: "8px" }}>
+          <input
+            type="text"
+            placeholder="Location (e.g. New York)"
+            value={mapLocation}
+            onChange={(e) => setMapLocation(e.target.value)}
+            className="w-full mb-2 p-1 text-sm bg-gray-700 rounded border border-gray-600"
+          />
+        </div>
         <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
+          value={commentText}
+          onChange={(e) => setCommentText(e.target.value)}
           placeholder={user ? "Share feedback..." : "Sign in to comment"}
           rows={3}
+          style={{ width: "100%" }}
         />
         <button type="submit">Post</button>
       </form>
       <div className="comments-list">
         {comments.map((c) => (
           <div key={c.id} className="comment-item">
-            <strong>{c.user || "User"}</strong>
-            <div>{c.text}</div>
+            <strong>
+              {c.expand?.user?.email || c.expand?.user?.username || "User"}
+            </strong>{" "}
+            <span style={{ fontSize: "0.8em", color: "#aaa" }}>
+              @{c.mapLocation}
+            </span>
+            <div>{c.commentText}</div>
           </div>
         ))}
       </div>
