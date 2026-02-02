@@ -17,7 +17,7 @@ FROM alpine:latest
 RUN apk add --no-cache unzip ca-certificates
 
 # Set the PocketBase version
-ARG PB_VERSION=0.22.4
+ARG PB_VERSION=0.24.4
 
 # Download and unzip PocketBase
 ADD https://github.com/pocketbase/pocketbase/releases/download/v${PB_VERSION}/pocketbase_${PB_VERSION}_linux_amd64.zip /tmp/pb.zip
@@ -29,8 +29,8 @@ COPY --from=frontend-build /build/dist /pb/pb_public
 # Copy database migrations
 COPY pb_migrations /pb/pb_migrations
 
-# Expose the port
+# Expose the port (Render will use $PORT)
 EXPOSE 8090
 
-# Start PocketBase
-CMD ["/pb/pocketbase", "serve", "--http=0.0.0.0:8090"]
+# Start PocketBase with dynamic port support
+CMD ["sh", "-c", "/pb/pocketbase serve --http=0.0.0.0:${PORT:-8090} --dir=/pb/pb_data"]
