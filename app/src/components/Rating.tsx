@@ -10,7 +10,7 @@ const Rating: React.FC = () => {
   useEffect(() => {
     const fetchAvg = async () => {
       try {
-        const list = await pb.collection("ratings").getFullList(100);
+        const list = await pb.collection("Ratings").getFullList(100);
         if (list.length) {
           const sum = list.reduce((s: any, r: any) => s + (r.value || 0), 0);
           setAvg(sum / list.length);
@@ -23,9 +23,9 @@ const Rating: React.FC = () => {
   const submit = async (v: number) => {
     if (!user) return alert("Sign in to rate");
     try {
-      await pb.collection("ratings").create({ user: user.id, value: v });
+      await pb.collection("Ratings").create({ user: user.id, value: v });
       setRating(v);
-      const list = await pb.collection("ratings").getFullList(100);
+      const list = await pb.collection("Ratings").getFullList(100);
       const sum = list.reduce((s: any, r: any) => s + (r.value || 0), 0);
       setAvg(sum / list.length);
     } catch (e) {}

@@ -24,7 +24,7 @@ const CommentBox: React.FC<CommentBoxProps> = ({ currentLocation, onSelectLocati
     const fetchComments = async () => {
       try {
         const res = await pb
-          .collection("comments")
+          .collection("Comments")
           .getFullList(50, { sort: "-created", expand: "user" });
         setComments(res as any);
       } catch (e) {
@@ -33,14 +33,14 @@ const CommentBox: React.FC<CommentBoxProps> = ({ currentLocation, onSelectLocati
     };
     fetchComments();
 
-    pb.collection("comments").subscribe("*", function (e) {
+    pb.collection("Comments").subscribe("*", function (e) {
       if (e.action === "create") {
         setComments((prev) => [e.record, ...prev]);
       }
     });
 
     return () => {
-      pb.collection("comments").unsubscribe("*");
+      pb.collection("Comments").unsubscribe("*");
     };
   }, []);
 
@@ -66,7 +66,7 @@ const CommentBox: React.FC<CommentBoxProps> = ({ currentLocation, onSelectLocati
     if (!commentText.trim()) return;
     
     try {
-      await pb.collection("comments").create({
+      await pb.collection("Comments").create({
         commentText: commentText,
         mapLocation: mapLocation || "General",
         user: user.id,

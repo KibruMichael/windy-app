@@ -19,7 +19,7 @@ const Favorites: React.FC<{ onSelect: (lat: number, lon: number) => void }> = ({
 
     const fetchFavorites = async () => {
       try {
-        const records = await pb.collection("favorites").getFullList<Favorite>({
+        const records = await pb.collection("Favorites").getFullList<Favorite>({
           filter: `user = "${user.id}"`,
           sort: "-created",
         });
@@ -32,7 +32,7 @@ const Favorites: React.FC<{ onSelect: (lat: number, lon: number) => void }> = ({
     fetchFavorites();
 
     // Subscribe to realtime changes
-    pb.collection("favorites").subscribe("*", (e) => {
+    pb.collection("Favorites").subscribe("*", (e) => {
       if (e.action === "create") {
         setFavorites((prev) => [e.record as unknown as Favorite, ...prev]);
       } else if (e.action === "delete") {
@@ -41,13 +41,13 @@ const Favorites: React.FC<{ onSelect: (lat: number, lon: number) => void }> = ({
     });
 
     return () => {
-      pb.collection("favorites").unsubscribe("*");
+      pb.collection("Favorites").unsubscribe("*");
     };
   }, [user]);
 
   const removeFavorite = async (id: string) => {
     try {
-      await pb.collection("favorites").delete(id);
+      await pb.collection("Favorites").delete(id);
     } catch (error) {
       console.error("Error deleting favorite:", error);
     }

@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./App.css";
@@ -87,6 +87,14 @@ function AppContent() {
     Array<{ name: string; country: string; lat: number; lon: number }>
   >([]);
 
+  const ChangeView = ({ center, zoom }: { center: [number, number]; zoom: number }) => {
+    const map = useMap();
+    useEffect(() => {
+      map.setView(center, zoom);
+    }, [center, zoom, map]);
+    return null;
+  };
+
   const MapClickHandler = () => {
     useMapEvents({
       click: (e) => {
@@ -141,15 +149,15 @@ function AppContent() {
   const saveFavorite = async () => {
     if (!user || !weather) return;
     try {
-      await pb.collection("favorites").create({
+      await pb.collection("Favorites").create({
         locationName: weather.name,
         coordinates: `${position[0]},${position[1]}`,
         user: user.id,
       });
-      alert("Added to favorites!");
+      alert("Added to Favorites!");
     } catch (error) {
       console.error("Error saving favorite:", error);
-      alert("Already in favorites or error occurred.");
+      alert("Already in Favorites or error occurred.");
     }
   };
 
@@ -220,6 +228,7 @@ function AppContent() {
       {/* Map */}
       <div className="map-wrapper">
         <MapContainer center={position} zoom={5} className="map">
+          <ChangeView center={position} zoom={5} />
           <TileLayer
             url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
             attribution=""
