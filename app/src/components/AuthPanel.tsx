@@ -77,6 +77,7 @@ const LoginForm: React.FC<{ onSwitch: () => void }> = ({ onSwitch }) => {
 const RegisterForm: React.FC<{ onSwitch: () => void }> = ({ onSwitch }) => {
   const { register } = useAuth();
   const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -84,6 +85,10 @@ const RegisterForm: React.FC<{ onSwitch: () => void }> = ({ onSwitch }) => {
   const validate = () => {
     if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
       setError("Please enter a valid email address");
+      return false;
+    }
+    if (!name || name.length < 2) {
+      setError("Name must be at least 2 characters");
       return false;
     }
     if (!password || password.length < 6) {
@@ -99,7 +104,7 @@ const RegisterForm: React.FC<{ onSwitch: () => void }> = ({ onSwitch }) => {
     if (!validate()) return;
     setLoading(true);
     try {
-      await register(email, password);
+      await register(email, password, name);
     } catch (err: any) {
       const msg = err?.data?.message || err?.message || "Register failed";
       setError(msg);
@@ -120,6 +125,15 @@ const RegisterForm: React.FC<{ onSwitch: () => void }> = ({ onSwitch }) => {
           if (error) setError(null);
         }}
         aria-label="email"
+      />
+      <input
+        placeholder="Full Name / Handle"
+        value={name}
+        onChange={(e) => {
+          setName(e.target.value);
+          if (error) setError(null);
+        }}
+        aria-label="name"
       />
       <input
         placeholder="Password"

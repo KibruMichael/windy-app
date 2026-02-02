@@ -11,7 +11,7 @@ interface AuthContextValue {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string, name: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -40,11 +40,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setUser(pb.authStore.model as any);
   };
 
-  const register = async (email: string, password: string) => {
+  const register = async (email: string, password: string, name: string) => {
     // Create a new user in pocketbase 'users' collection
     await pb
       .collection("users")
-      .create({ email, password, passwordConfirm: password });
+      .create({ email, password, passwordConfirm: password, name });
     await login(email, password);
   };
 
