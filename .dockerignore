@@ -1,0 +1,8 @@
+node_modules/
+dist/
+pb_data/
+.env
+.env.local
+.git/
+.dockerignore
+Dockerfile
