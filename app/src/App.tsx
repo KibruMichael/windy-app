@@ -4,9 +4,12 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./App.css";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
+import pb from "./lib/pocketbase";
 import AuthPanel from "./components/AuthPanel";
 import CommentBox from "./components/CommentBox";
 import Rating from "./components/Rating";
+import Favorites from "./components/Favorites";
+import { Star } from "lucide-react";
 
 // Fix Leaflet default marker icons
 const DefaultIcon = L.icon({
@@ -133,6 +136,21 @@ function AppContent() {
     setPosition([loc.lat, loc.lon]);
     setSearchResults([]);
     setSearchQuery("");
+  };
+
+  const saveFavorite = async () => {
+    if (!user || !weather) return;
+    try {
+      await pb.collection("favorites").create({
+        locationName: weather.name,
+        coordinates: `${position[0]},${position[1]}`,
+        user: user.id,
+      });
+      alert("Added to favorites!");
+    } catch (error) {
+      console.error("Error saving favorite:", error);
+      alert("Already in favorites or error occurred.");
+    }
   };
 
   useEffect(() => {
@@ -313,7 +331,24 @@ function AppContent() {
           <>
             {/* Current Weather */}
             <div className="current-weather">
-              <h2>{weather.name}</h2>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <h2>{weather.name}</h2>
+                <button 
+                  onClick={saveFavorite}
+                  style={{ 
+                    background: "none", 
+                    border: "none", 
+                    cursor: "pointer", 
+                    color: "#FFD700",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "4px"
+                  }}
+                  title="Save to favorites"
+                >
+                  <Star size={20} />
+                </button>
+              </div>
               <div className="temp-row">
                 <img src={getWeatherIconUrl(weather.weather[0].icon)} alt="" />
                 <span className="temp">{Math.round(weather.main.temp)}°</span>
@@ -412,7 +447,8 @@ function AppContent() {
         <div className="sidebar-attribution">
           © OpenStreetMap contributors © CARTO
         </div>
-        <CommentBox />
+        <Favorites onSelect={(lat, lon) => setPosition([lat, lon])} />
+        <CommentBox currentLocation={weather?.name} />
         <Rating />
       </div>
     </div>

@@ -2,11 +2,17 @@ import React, { useEffect, useState } from "react";
 import pb from "../lib/pocketbase";
 import { useAuth } from "../hooks/useAuth";
 
-const CommentBox: React.FC = () => {
+const CommentBox: React.FC<{ currentLocation?: string }> = ({ currentLocation }) => {
   const { user } = useAuth();
   const [comments, setComments] = useState<any[]>([]);
   const [commentText, setCommentText] = useState("");
-  const [mapLocation, setMapLocation] = useState("Unknown");
+  const [mapLocation, setMapLocation] = useState(currentLocation || "Unknown");
+
+  useEffect(() => {
+    if (currentLocation) {
+      setMapLocation(currentLocation);
+    }
+  }, [currentLocation]);
 
   useEffect(() => {
     const fetchComments = async () => {
