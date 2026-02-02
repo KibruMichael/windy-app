@@ -448,7 +448,10 @@ function AppContent() {
           © OpenStreetMap contributors © CARTO
         </div>
         <Favorites onSelect={(lat, lon) => setPosition([lat, lon])} />
-        <CommentBox currentLocation={weather?.name} />
+        <CommentBox 
+          currentLocation={weather?.name} 
+          onSelectLocation={(lat: number, lon: number) => setPosition([lat, lon])}
+        />
         <Rating />
       </div>
     </div>
