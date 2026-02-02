@@ -17,7 +17,7 @@ FROM alpine:latest
 RUN apk add --no-cache unzip ca-certificates
 
 # Set the PocketBase version
-ARG PB_VERSION=0.24.4
+ARG PB_VERSION=0.36.2
 
 # Download and unzip PocketBase
 ADD https://github.com/pocketbase/pocketbase/releases/download/v${PB_VERSION}/pocketbase_${PB_VERSION}_linux_amd64.zip /tmp/pb.zip
