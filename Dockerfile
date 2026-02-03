@@ -26,6 +26,9 @@ RUN unzip /tmp/pb.zip -d /pb/
 # Copy the compiled Frontend from Stage 1 to PocketBase's public folder
 COPY --from=frontend-build /build/dist /pb/pb_public
 
+# Copy the migrations folder
+COPY pb_migrations /pb/pb_migrations
+
 # Expose the port
 EXPOSE 8090
 
