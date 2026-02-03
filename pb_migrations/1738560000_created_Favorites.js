@@ -35,10 +35,10 @@ migrate(
       deleteRule: "user = @request.auth.id",
     });
 
-    return db.save(collection);
+    return db.saveCollection(collection);
   },
   (db) => {
     const collection = db.findCollectionByNameOrId("Favorites");
-    return db.delete(collection);
+    return db.deleteCollection(collection);
   },
 );
