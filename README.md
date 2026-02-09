@@ -1,4 +1,4 @@
-# 🌬️ Windy Clone - Interactive Weather Map & Social Platform
+#  Interactive Weather Map & Social Platform
 
 ![Windy App Screenshot](https://via.placeholder.com/800x400?text=Windy+App+Preview) *Add a screenshot of your app here*
 
