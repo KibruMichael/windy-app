@@ -35,12 +35,10 @@ migrate(
       deleteRule: "user = @request.auth.id",
     });
 
-    const dao = new Dao(db);
-    return dao.saveCollection(collection);
+    return app.saveCollection(collection);
   },
   (db) => {
-    const dao = new Dao(db);
-    const collection = dao.findCollectionByNameOrId("Comments");
-    return dao.deleteCollection(collection);
+    const collection = app.findCollectionByNameOrId("Comments");
+    return app.deleteCollection(collection);
   },
 );
