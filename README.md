@@ -143,5 +143,16 @@ For detailed deployment instructions, see [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUI
 - The map logic is in `src/components/ForecastPanel.tsx` (and related map components).
 - You can add new layers (e.g., Rain, Clouds) by extending the Leaflet layers.
 
-## 📄 License
+## � Monitoring & Data (Where are my records?)
+
+The application uses two **completely separate** databases. Data created in one does not appear in the other.
+
+| Environment | App URL | Admin Dashboard (Check Records Here) | Use Case |
+| :--- | :--- | :--- | :--- |
+| **Local** | `http://localhost:5173` | [http://127.0.0.1:8090/_/](http://127.0.0.1:8090/_/) | Development, testing features, breaking things. |
+| **Production** | `https://windy-app.onrender.com` | [https://windy-app.onrender.com/_/](https://windy-app.onrender.com/_/) | Real users, live data, permanent storage. |
+
+**Tip**: Valid login credentials are required for both dashboards.
+
+## �📄 License
 MIT License - feel free to use and modify for your own projects.
