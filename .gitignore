@@ -1,13 +1,15 @@
 # Node
-node_modules/
-dist/
+node_modules
+dist
 .env
 .env.local
 .DS_Store
 
-# PocketBase
+# PocketBase (Local)
 pb_data/
 pocketbase
 pocketbase.exe
 *.log
 pocketbase_windows_amd64.zip
+app/src/components/pocketbase/
+firebase-debug.log
