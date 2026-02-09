@@ -32,5 +32,9 @@ COPY pb_migrations /pb/pb_migrations
 # Expose the port
 EXPOSE 8090
 
-# Start PocketBase
-CMD ["sh", "-c", "/pb/pocketbase serve --http=0.0.0.0:${PORT:-8090}"]
+# Environment variables for admin setup (set these in Render Dashboard)
+ENV PB_ADMIN_EMAIL=""
+ENV PB_ADMIN_PASSWORD=""
+
+# Start PocketBase with auto superuser creation
+CMD ["sh", "-c", "if [ -n \"$PB_ADMIN_EMAIL\" ] && [ -n \"$PB_ADMIN_PASSWORD\" ]; then /pb/pocketbase superuser upsert \"$PB_ADMIN_EMAIL\" \"$PB_ADMIN_PASSWORD\" || true; fi && /pb/pocketbase serve --http=0.0.0.0:${PORT:-8090}"]
