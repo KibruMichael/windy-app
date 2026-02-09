@@ -58,16 +58,48 @@ Once the deployment is live (green checkmark), you need to initialize the databa
 3.  Post a comment or save a favorite.
 4.  Check the Admin Dashboard to see the new records.
 
-## 🔄 Updating the App
-To deploy new changes (frontend or backend code):
-1.  Push your changes to GitHub (`git push`).
-2.  Render will automatically detect the push and start a new deployment.
-    - If you modified `pb_migrations`, re-import the schema via the UI if necessary (PocketBase usually handles additive changes, but major schema changes might require manual intervention).
+## 🔄 Updating & Git Sync
 
-## �️ Troubleshooting
+To update your live application, simply push your local changes to GitHub:
+```bash
+git add .
+git commit -m "Describe your changes"
+git push origin main
+```
+Render will see this push and automatically start a "Redeploy".
+
+### ⚠️ Handling "Rejected" Pushes (Conflicts)
+If you see an error like `! [rejected] main -> main (fetch first)`, it means the GitHub server has changes that you don't have on your computer. To fix this:
+
+1. **Commit** your local changes first.
+2. **Pull and Rebase**:
+   ```bash
+   git pull --rebase origin main
+   ```
+   *This downloads the remote changes and "re-plays" your new commits on top of them.*
+3. **Push again**:
+   ```bash
+   git push origin main
+   ```
+
+## 🧠 Understanding the Stack
+
+It is important to understand how these tools connect:
+
+1. **GitHub (The Archive)**: Stores your code files. When you "Push", you update the source of truth.
+2. **Render (The Orchestrator)**: Watches GitHub. Every push triggers a new "Build". It follows your `Dockerfile` to create a working environment.
+3. **PocketBase (The Heart)**: Runs inside the Render container. It manages both your **Database** and serves the **Frontend** files to users.
+
+## 🛠️ Troubleshooting
 
 ### "Dao is not defined" Error
-If you see migration errors in the logs, ensure you are using the modern PocketBase v0.23+ migration format (using `app` instead of `Dao`). This repository is already patched for this.
+Ensure you use the PocketBase v0.23+ format (using `app` instead of `Dao`). This repository is already patched.
 
 ### Data Disappears on Restart?
-Ensure you attached a **Persistent Disk** on Render mounting to `/pb/pb_data`. Without this, the SQLite database is ephemeral and lost on every deployment.
+Ensure you attached a **Persistent Disk** on Render mounting to `/pb/pb_data`. Without this, the database is lost every time the app restarts or redeploys.
+
+### Port Conflicts (Local)
+If you cannot start PocketBase locally because the port is in use:
+```bash
+./pocketbase serve --http=0.0.0.0:9000
+```
