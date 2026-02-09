@@ -1,0 +1,94 @@
+[
+  {
+    "name": "Comments",
+    "type": "base",
+    "schema": [
+      {
+        "name": "commentText",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "mapLocation",
+        "type": "text",
+        "required": false
+      },
+      {
+        "name": "user",
+        "type": "relation",
+        "required": true,
+        "options": {
+          "collectionId": "_pb_users_auth_",
+          "cascadeDelete": false,
+          "maxSelect": 1
+        }
+      }
+    ],
+    "listRule": "",
+    "viewRule": "",
+    "createRule": "",
+    "updateRule": "user = @request.auth.id",
+    "deleteRule": "user = @request.auth.id"
+  },
+  {
+    "name": "Favorites",
+    "type": "base",
+    "schema": [
+      {
+        "name": "locationName",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "coordinates",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "user",
+        "type": "relation",
+        "required": true,
+        "options": {
+          "collectionId": "_pb_users_auth_",
+          "cascadeDelete": false,
+          "maxSelect": 1
+        }
+      }
+    ],
+    "listRule": "",
+    "viewRule": "",
+    "createRule": "",
+    "updateRule": "user = @request.auth.id",
+    "deleteRule": "user = @request.auth.id"
+  },
+  {
+    "name": "Ratings",
+    "type": "base",
+    "schema": [
+      {
+        "name": "value",
+        "type": "number",
+        "required": true,
+        "options": {
+          "min": 1,
+          "max": 5
+        }
+      },
+      {
+        "name": "user",
+        "type": "relation",
+        "required": true,
+        "options": {
+          "collectionId": "_pb_users_auth_",
+          "cascadeDelete": false,
+          "maxSelect": 1
+        }
+      }
+    ],
+    "listRule": "",
+    "viewRule": "",
+    "createRule": "",
+    "updateRule": "user = @request.auth.id",
+    "deleteRule": "user = @request.auth.id"
+  }
+]

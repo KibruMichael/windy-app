@@ -26,10 +26,11 @@ const LoginForm: React.FC<{ onSwitch: () => void }> = ({ onSwitch }) => {
     e.preventDefault();
     if (!validate()) return;
     setLoading(true);
+    setError(null);
     try {
       await login(email, password);
     } catch (err: any) {
-      const msg = err?.data?.message || err?.message || "Login failed";
+      const msg = err?.message || "Login failed";
       setError(msg);
     } finally {
       setLoading(false);
@@ -42,12 +43,14 @@ const LoginForm: React.FC<{ onSwitch: () => void }> = ({ onSwitch }) => {
       {error && <div className="auth-error">{error}</div>}
       <input
         placeholder="Email"
+        type="email"
         value={email}
         onChange={(e) => {
           setEmail(e.target.value);
           if (error) setError(null);
         }}
         aria-label="email"
+        autoComplete="email"
       />
       <input
         placeholder="Password"
@@ -58,6 +61,7 @@ const LoginForm: React.FC<{ onSwitch: () => void }> = ({ onSwitch }) => {
           if (error) setError(null);
         }}
         aria-label="password"
+        autoComplete="current-password"
       />
       <button type="submit" disabled={loading} aria-busy={loading}>
         {loading ? "Signing in..." : "Sign In"}
@@ -91,8 +95,8 @@ const RegisterForm: React.FC<{ onSwitch: () => void }> = ({ onSwitch }) => {
       setError("Name must be at least 2 characters");
       return false;
     }
-    if (!password || password.length < 6) {
-      setError("Password must be at least 6 characters");
+    if (!password || password.length < 8) {
+      setError("Password must be at least 8 characters");
       return false;
     }
     setError(null);
@@ -103,10 +107,11 @@ const RegisterForm: React.FC<{ onSwitch: () => void }> = ({ onSwitch }) => {
     e.preventDefault();
     if (!validate()) return;
     setLoading(true);
+    setError(null);
     try {
       await register(email, password, name);
     } catch (err: any) {
-      const msg = err?.data?.message || err?.message || "Register failed";
+      const msg = err?.message || "Registration failed";
       setError(msg);
     } finally {
       setLoading(false);
@@ -119,24 +124,27 @@ const RegisterForm: React.FC<{ onSwitch: () => void }> = ({ onSwitch }) => {
       {error && <div className="auth-error">{error}</div>}
       <input
         placeholder="Email"
+        type="email"
         value={email}
         onChange={(e) => {
           setEmail(e.target.value);
           if (error) setError(null);
         }}
         aria-label="email"
+        autoComplete="email"
       />
       <input
-        placeholder="Full Name / Handle"
+        placeholder="Full Name"
         value={name}
         onChange={(e) => {
           setName(e.target.value);
           if (error) setError(null);
         }}
         aria-label="name"
+        autoComplete="name"
       />
       <input
-        placeholder="Password"
+        placeholder="Password (min 8 characters)"
         type="password"
         value={password}
         onChange={(e) => {
@@ -144,6 +152,7 @@ const RegisterForm: React.FC<{ onSwitch: () => void }> = ({ onSwitch }) => {
           if (error) setError(null);
         }}
         aria-label="password"
+        autoComplete="new-password"
       />
       <button type="submit" disabled={loading} aria-busy={loading}>
         {loading ? "Creating..." : "Create Account"}

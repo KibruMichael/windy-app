@@ -4,6 +4,7 @@ import pb from "../lib/pocketbase";
 interface User {
   id: string;
   email?: string;
+  name?: string;
   [k: string]: any;
 }
 
@@ -36,16 +37,73 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   const login = async (email: string, password: string) => {
-    await pb.collection("users").authWithPassword(email, password);
-    setUser(pb.authStore.model as any);
+    try {
+      const authData = await pb.collection("users").authWithPassword(email, password);
+      console.log("Login successful:", authData);
+      setUser(pb.authStore.model as any);
+    } catch (err: any) {
+      console.error("Login error:", err);
+      let msg = "Login failed";
+      if (err?.data?.data) {
+        const errors = err.data.data;
+        const errorMessages = Object.entries(errors)
+          .map(([field, info]: [string, any]) => `${field}: ${info?.message || info}`)
+          .join(", ");
+        msg = errorMessages || msg;
+      } else if (err?.data?.message) {
+        msg = err.data.message;
+      } else if (err?.message) {
+        msg = err.message;
+      }
+      throw new Error(msg);
+    }
   };
 
   const register = async (email: string, password: string, name: string) => {
-    // Create a new user in pocketbase 'users' collection
-    await pb
-      .collection("users")
-      .create({ email, password, passwordConfirm: password, name });
-    await login(email, password);
+    try {
+      console.log("Attempting to register user:", { email, name });
+      
+      // Create user - only send fields that exist in the collection schema
+      // Schema has: email, password, name (required), emailVisibility
+      // No username field in this schema
+      const userData = {
+        email,
+        password,
+        passwordConfirm: password,
+        name,
+        emailVisibility: true,
+      };
+
+      console.log("Sending to PocketBase:", userData);
+      const createdUser = await pb.collection("users").create(userData);
+      console.log("User created successfully:", createdUser);
+      
+      // Auto-login after registration
+      await login(email, password);
+    } catch (err: any) {
+      console.error("Registration error:", err);
+      let msg = "Registration failed";
+      
+      if (err?.data?.data) {
+        // PocketBase field validation errors
+        const errors = err.data.data;
+        const errorMessages = Object.entries(errors)
+          .map(([field, info]: [string, any]) => {
+            if (typeof info === 'object' && info?.message) {
+              return `${field}: ${info.message}`;
+            }
+            return `${field}: ${info}`;
+          })
+          .join(", ");
+        msg = errorMessages || msg;
+      } else if (err?.data?.message) {
+        msg = err.data.message;
+      } else if (err?.message) {
+        msg = err.message;
+      }
+      
+      throw new Error(msg);
+    }
   };
 
   const logout = () => {

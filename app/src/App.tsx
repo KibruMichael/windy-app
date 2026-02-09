@@ -1,10 +1,18 @@
 import { useState, useCallback, useEffect } from "react";
-import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-leaflet";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  useMapEvents,
+  useMap,
+} from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./App.css";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
 import pb from "./lib/pocketbase";
+import pbClient from "./lib/pbClient";
+import { toast } from "sonner";
 import AuthPanel from "./components/AuthPanel";
 import CommentBox from "./components/CommentBox";
 import Rating from "./components/Rating";
@@ -87,7 +95,13 @@ function AppContent() {
     Array<{ name: string; country: string; lat: number; lon: number }>
   >([]);
 
-  const ChangeView = ({ center, zoom }: { center: [number, number]; zoom: number }) => {
+  const ChangeView = ({
+    center,
+    zoom,
+  }: {
+    center: [number, number];
+    zoom: number;
+  }) => {
     const map = useMap();
     useEffect(() => {
       map.setView(center, zoom);
@@ -149,15 +163,31 @@ function AppContent() {
   const saveFavorite = async () => {
     if (!user || !weather) return;
     try {
-      await pb.collection("Favorites").create({
-        locationName: weather.name,
-        coordinates: `${position[0]},${position[1]}`,
-        user: user.id,
-      });
-      alert("Added to Favorites!");
+      // avoid duplicates: check existing
+      const existing = await pbClient.getFavorites(user.id);
+      if (
+        existing &&
+        existing.find(
+          (f: any) => f.coordinates === `${position[0]},${position[1]}`,
+        )
+      ) {
+        toast.info("Already in Favorites");
+        return;
+      }
+      await pbClient.createFavorite(
+        weather.name,
+        `${position[0]},${position[1]}`,
+        user.id
+      );
+      toast.success("Added to Favorites!");
     } catch (error) {
       console.error("Error saving favorite:", error);
-      alert("Already in Favorites or error occurred.");
+      const err: any = error;
+      const msg =
+        (err && err.data && err.data.message) ||
+        err.message ||
+        JSON.stringify(err);
+      toast.error(msg || "Already in Favorites or error occurred.");
     }
   };
 
@@ -260,10 +290,7 @@ function AppContent() {
         </div>
 
         {/* Zoom Controls */}
-        <div className="zoom-controls">
-          <button onClick={() => {}}>+</button>
-          <button onClick={() => {}}>-</button>
-        </div>
+
       </div>
 
       {/* Sidebar */}
@@ -318,40 +345,30 @@ function AppContent() {
 
         {loading && <div className="loading">Loading...</div>}
 
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "flex-end",
-            gap: 8,
-            marginBottom: 8,
-          }}
-        >
-          <button
-            onClick={() => {
-              logout();
-            }}
-            className="layer-btn"
-          >
-            Logout
-          </button>
-        </div>
+
 
         {weather && (
           <>
             {/* Current Weather */}
             <div className="current-weather">
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
                 <h2>{weather.name}</h2>
-                <button 
+                <button
                   onClick={saveFavorite}
-                  style={{ 
-                    background: "none", 
-                    border: "none", 
-                    cursor: "pointer", 
+                  style={{
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
                     color: "#FFD700",
                     display: "flex",
                     alignItems: "center",
-                    gap: "4px"
+                    gap: "4px",
                   }}
                   title="Save to favorites"
                 >
@@ -457,9 +474,11 @@ function AppContent() {
           © OpenStreetMap contributors © CARTO
         </div>
         <Favorites onSelect={(lat, lon) => setPosition([lat, lon])} />
-        <CommentBox 
-          currentLocation={weather?.name} 
-          onSelectLocation={(lat: number, lon: number) => setPosition([lat, lon])}
+        <CommentBox
+          currentLocation={weather?.name}
+          onSelectLocation={(lat: number, lon: number) =>
+            setPosition([lat, lon])
+          }
         />
         <Rating />
       </div>

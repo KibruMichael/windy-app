@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from "react";
-import pb from "../lib/pocketbase";
+import pbClient from "../lib/pbClient";
 import { useAuth } from "../hooks/useAuth";
+import { toast } from "sonner";
+
+interface RatingRecord {
+  id: string;
+  value: number;
+  user: string;
+}
 
 const Rating: React.FC = () => {
   const { user } = useAuth();
@@ -10,25 +17,38 @@ const Rating: React.FC = () => {
   useEffect(() => {
     const fetchAvg = async () => {
       try {
-        const list = await pb.collection("Ratings").getFullList(100);
-        if (list.length) {
-          const sum = list.reduce((s: any, r: any) => s + (r.value || 0), 0);
+        const list = await pbClient.getRatings() as RatingRecord[];
+        if (list && list.length) {
+          const sum = list.reduce((s, r) => s + (r.value || 0), 0);
           setAvg(sum / list.length);
         }
-      } catch (e) {}
+      } catch (e) {
+        console.error("Failed to fetch ratings", e);
+      }
     };
     fetchAvg();
   }, []);
 
   const submit = async (v: number) => {
-    if (!user) return alert("Sign in to rate");
+    if (!user) {
+      toast.info("Sign in to rate");
+      return;
+    }
     try {
-      await pb.collection("Ratings").create({ user: user.id, value: v });
+      await pbClient.createOrUpdateRating(user.id, v);
       setRating(v);
-      const list = await pb.collection("Ratings").getFullList(100);
-      const sum = list.reduce((s: any, r: any) => s + (r.value || 0), 0);
+      const list = await pbClient.getRatings() as RatingRecord[];
+      const sum = list.reduce((s, r) => s + (r.value || 0), 0);
       setAvg(sum / list.length);
-    } catch (e) {}
+      toast.success("Thanks for rating");
+    } catch (err: any) {
+      console.error("Create rating error:", err);
+      const msg =
+        (err && err.data && err.data.message) ||
+        (err && err.message) ||
+        JSON.stringify(err);
+      toast.error(msg || "Failed to create rating.");
+    }
   };
 
   return (

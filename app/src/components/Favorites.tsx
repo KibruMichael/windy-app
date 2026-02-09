@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import pb from "../lib/pocketbase";
+import pbClient from "../lib/pbClient";
+import { toast } from "sonner";
 import { useAuth } from "../hooks/useAuth";
 import { Star, Trash2 } from "lucide-react";
 
@@ -8,9 +9,12 @@ interface Favorite {
   locationName: string;
   coordinates: string;
   user: string;
+  created: string;
 }
 
-const Favorites: React.FC<{ onSelect: (lat: number, lon: number) => void }> = ({ onSelect }) => {
+const Favorites: React.FC<{ onSelect: (lat: number, lon: number) => void }> = ({
+  onSelect,
+}) => {
   const { user } = useAuth();
   const [favorites, setFavorites] = useState<Favorite[]>([]);
 
@@ -19,11 +23,8 @@ const Favorites: React.FC<{ onSelect: (lat: number, lon: number) => void }> = ({
 
     const fetchFavorites = async () => {
       try {
-        const records = await pb.collection("Favorites").getFullList<Favorite>({
-          filter: `user = "${user.id}"`,
-          sort: "-created",
-        });
-        setFavorites(records);
+        const records = await pbClient.getFavorites(user.id);
+        setFavorites(records as Favorite[]);
       } catch (error) {
         console.error("Error fetching favorites:", error);
       }
@@ -32,7 +33,7 @@ const Favorites: React.FC<{ onSelect: (lat: number, lon: number) => void }> = ({
     fetchFavorites();
 
     // Subscribe to realtime changes
-    pb.collection("Favorites").subscribe("*", (e) => {
+    const unsub = pbClient.subscribeFavorites(user.id, (e: any) => {
       if (e.action === "create") {
         setFavorites((prev) => [e.record as unknown as Favorite, ...prev]);
       } else if (e.action === "delete") {
@@ -41,26 +42,43 @@ const Favorites: React.FC<{ onSelect: (lat: number, lon: number) => void }> = ({
     });
 
     return () => {
-      pb.collection("Favorites").unsubscribe("*");
+      if (typeof unsub === "function") unsub();
     };
   }, [user]);
 
   const removeFavorite = async (id: string) => {
     try {
-      await pb.collection("Favorites").delete(id);
+      await pbClient.deleteFavorite(id);
+      toast.success("Removed from Favorites");
     } catch (error) {
       console.error("Error deleting favorite:", error);
+      toast.error("Failed to remove favorite");
     }
   };
 
   if (!user || favorites.length === 0) return null;
 
   return (
-    <div className="favorites-box" style={{ marginTop: "20px", marginBottom: "20px" }}>
-      <h3 style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "0.9rem", color: "#A6B3D0", marginBottom: "10px" }}>
+    <div
+      className="favorites-box"
+      style={{ marginTop: "20px", marginBottom: "20px" }}
+    >
+      <h3
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "8px",
+          fontSize: "0.9rem",
+          color: "#A6B3D0",
+          marginBottom: "10px",
+        }}
+      >
         <Star size={16} fill="#FFD700" color="#FFD700" /> Saved Locations
       </h3>
-      <div className="favorites-list" style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+      <div
+        className="favorites-list"
+        style={{ display: "flex", flexDirection: "column", gap: "8px" }}
+      >
         {favorites.map((fav) => {
           const [lat, lon] = fav.coordinates.split(",").map(Number);
           return (
@@ -78,7 +96,9 @@ const Favorites: React.FC<{ onSelect: (lat: number, lon: number) => void }> = ({
               }}
               onClick={() => onSelect(lat, lon)}
             >
-              <span style={{ fontSize: "0.85rem", color: "#E0E0E0" }}>{fav.locationName}</span>
+              <span style={{ fontSize: "0.85rem", color: "#E0E0E0" }}>
+                {fav.locationName}
+              </span>
               <button
                 onClick={(e) => {
                   e.stopPropagation();
