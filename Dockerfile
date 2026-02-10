@@ -32,9 +32,10 @@ COPY pb_migrations /pb/pb_migrations
 # Expose the port
 EXPOSE 8090
 
-# Environment variables for admin setup (set these in Render Dashboard)
+# Environment variables for admin setup (set these in Railway Dashboard)
 ENV PB_ADMIN_EMAIL=""
 ENV PB_ADMIN_PASSWORD=""
 
-# Start PocketBase with auto superuser creation
-CMD ["sh", "-c", "if [ -n \"$PB_ADMIN_EMAIL\" ] && [ -n \"$PB_ADMIN_PASSWORD\" ]; then /pb/pocketbase superuser upsert \"$PB_ADMIN_EMAIL\" \"$PB_ADMIN_PASSWORD\" || true; fi && /pb/pocketbase serve --http=0.0.0.0:${PORT:-8090}"]
+# Create data directory and start PocketBase
+# The admin will be created on first run if env vars are set
+CMD ["sh", "-c", "mkdir -p /pb/pb_data && /pb/pocketbase serve --http=0.0.0.0:${PORT:-8090}"]
