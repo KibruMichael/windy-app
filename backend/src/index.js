@@ -5,6 +5,9 @@ const jwt = require('jsonwebtoken');
 const { PrismaClient } = require('@prisma/client');
 const { z } = require('zod');
 
+// Load environment variables
+require('dotenv').config();
+
 const app = express();
 const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-key-change-in-production';
