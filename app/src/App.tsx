@@ -9,13 +9,13 @@ import {
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./App.css";
-import { AuthProvider, useAuth } from "./hooks/useAuthNew";
+import { AuthProvider, useAuth } from "./hooks/useAuth";
 import apiClient from "./lib/apiClient";
 import { toast } from "sonner";
 import AuthPanel from "./components/AuthPanel";
-import CommentBox from "./components/CommentBoxNew";
-import Rating from "./components/RatingNew";
-import Favorites from "./components/FavoritesNew";
+import CommentBox from "./components/CommentBox";
+import Rating from "./components/Rating";
+import Favorites from "./components/Favorites";
 import { Star } from "lucide-react";
 
 // Fix Leaflet default marker icons

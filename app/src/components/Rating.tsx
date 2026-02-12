@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
-import pbClient from "../lib/pbClient";
+import apiClient from "../lib/apiClient";
 import { useAuth } from "../hooks/useAuth";
 import { toast } from "sonner";
 
 interface RatingRecord {
   id: string;
   value: number;
-  user: string;
+  userId: string;
 }
 
 const Rating: React.FC = () => {
@@ -17,17 +17,26 @@ const Rating: React.FC = () => {
   useEffect(() => {
     const fetchAvg = async () => {
       try {
-        const list = await pbClient.getRatings() as RatingRecord[];
+        const list = await apiClient.ratings.getAll();
         if (list && list.length) {
           const sum = list.reduce((s, r) => s + (r.value || 0), 0);
           setAvg(sum / list.length);
+          
+          // Find user's rating
+          const userRating = list.find((r) => r.userId === user?.id);
+          if (userRating) {
+            setRating(userRating.value);
+          }
         }
       } catch (e) {
         console.error("Failed to fetch ratings", e);
       }
     };
-    fetchAvg();
-  }, []);
+    
+    if (user) {
+      fetchAvg();
+    }
+  }, [user]);
 
   const submit = async (v: number) => {
     if (!user) {
@@ -35,21 +44,22 @@ const Rating: React.FC = () => {
       return;
     }
     try {
-      await pbClient.createOrUpdateRating(user.id, v);
+      await apiClient.ratings.createOrUpdate(v);
       setRating(v);
-      const list = await pbClient.getRatings() as RatingRecord[];
+      
+      // Refresh average
+      const list = await apiClient.ratings.getAll();
       const sum = list.reduce((s, r) => s + (r.value || 0), 0);
       setAvg(sum / list.length);
+      
       toast.success("Thanks for rating");
     } catch (err: any) {
       console.error("Create rating error:", err);
-      const msg =
-        (err && err.data && err.data.message) ||
-        (err && err.message) ||
-        JSON.stringify(err);
-      toast.error(msg || "Failed to create rating.");
+      toast.error(err.message || "Failed to create rating.");
     }
   };
+
+  if (!user) return null;
 
   return (
     <div className="rating-box">

@@ -13,3 +13,4 @@ pocketbase.exe
 pocketbase_windows_amd64.zip
 app/src/components/pocketbase/
 firebase-debug.log
+.kilocode/  

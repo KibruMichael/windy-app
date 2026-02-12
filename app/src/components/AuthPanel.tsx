@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useAuth } from "../hooks/useAuthNew";
+import { useAuth } from "../hooks/useAuth";
 import "./auth.css";
 
 const LoginForm: React.FC<{ onSwitch: () => void }> = ({ onSwitch }) => {

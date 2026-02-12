@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import pbClient from "../lib/pbClient";
+import apiClient from "../lib/apiClient";
 import { useAuth } from "../hooks/useAuth";
 import { MessageSquare, MapPin, Navigation } from "lucide-react";
 import { toast } from "sonner";
@@ -13,15 +13,13 @@ interface Comment {
   id: string;
   commentText: string;
   mapLocation: string;
-  user: string;
-  created: string;
-  expand?: {
-    user?: {
-      id: string;
-      name?: string;
-      email?: string;
-    };
+  userId: string;
+  user?: {
+    id: string;
+    name?: string;
+    email?: string;
   };
+  createdAt: string;
 }
 
 const CommentBox: React.FC<CommentBoxProps> = ({
@@ -42,22 +40,17 @@ const CommentBox: React.FC<CommentBoxProps> = ({
   useEffect(() => {
     const fetchComments = async () => {
       try {
-        const res = await pbClient.getComments(50);
-        setComments(res as Comment[]);
+        const data = await apiClient.comments.getAll();
+        setComments(data);
       } catch (e) {
         console.error("Failed to fetch comments", e);
       }
     };
-    fetchComments();
     
-    const unsub = pbClient.subscribeComments((e: any) => {
-      if (e.action === "create") setComments((prev) => [e.record as Comment, ...prev]);
-    });
-
-    return () => {
-      if (typeof unsub === "function") unsub();
-    };
-  }, []);
+    if (user) {
+      fetchComments();
+    }
+  }, [user]);
 
   const handleLocationClick = (loc: string) => {
     if (!onSelectLocation) return;
@@ -83,35 +76,20 @@ const CommentBox: React.FC<CommentBoxProps> = ({
     }
     if (!commentText.trim()) return;
     try {
-      // optimistic local add (will also be added via realtime)
-      const temp: Comment = {
-        id: `temp-${Date.now()}`,
+      const newComment = await apiClient.comments.create(
         commentText,
-        mapLocation: mapLocation || "General",
-        user: user.id,
-        created: new Date().toISOString(),
-        expand: { user: { id: user.id, name: user.name || user.email } },
-      };
-      setComments((prev) => [temp, ...prev]);
-
-      await pbClient.createComment(
-        commentText,
-        mapLocation || "General",
-        user.id
+        mapLocation || "General"
       );
+      setComments([newComment, ...comments]);
       setCommentText("");
       toast.success("Comment posted");
     } catch (err: any) {
       console.error("Create comment error:", err);
-      const msg =
-        (err && err.data && err.data.message) ||
-        (err && err.message) ||
-        JSON.stringify(err);
-      toast.error(msg || "Failed to create comment.");
-      // remove optimistic temp if failure
-      setComments((prev) => prev.filter((c) => !c.id?.startsWith("temp-")));
+      toast.error(err.message || "Failed to create comment.");
     }
   };
+
+  if (!user) return null;
 
   return (
     <div className="comment-box">
@@ -140,7 +118,7 @@ const CommentBox: React.FC<CommentBoxProps> = ({
         <textarea
           value={commentText}
           onChange={(e) => setCommentText(e.target.value)}
-          placeholder={user ? "Share feedback..." : "Sign in to comment"}
+          placeholder="Share feedback..."
           rows={3}
         />
         <button type="submit">Post Comment</button>
@@ -148,12 +126,11 @@ const CommentBox: React.FC<CommentBoxProps> = ({
 
       <div className="comments-list">
         {comments.map((c) => {
-          const createdDate = new Date(c.created);
+          const createdDate = new Date(c.createdAt);
           if (isNaN(createdDate.getTime())) return null;
 
           const isCoords = c.mapLocation?.includes(",");
-          const displayName =
-            c.expand?.user?.name || c.expand?.user?.email || "User";
+          const displayName = c.user?.name || c.user?.email || "User";
 
           return (
             <div key={c.id} className="comment-item">

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import pbClient from "../lib/pbClient";
+import apiClient from "../lib/apiClient";
 import { toast } from "sonner";
 import { useAuth } from "../hooks/useAuth";
 import { Star, Trash2 } from "lucide-react";
@@ -8,8 +8,8 @@ interface Favorite {
   id: string;
   locationName: string;
   coordinates: string;
-  user: string;
-  created: string;
+  userId: string;
+  createdAt: string;
 }
 
 const Favorites: React.FC<{ onSelect: (lat: number, lon: number) => void }> = ({
@@ -23,7 +23,7 @@ const Favorites: React.FC<{ onSelect: (lat: number, lon: number) => void }> = ({
 
     const fetchFavorites = async () => {
       try {
-        const records = await pbClient.getFavorites(user.id);
+        const records = await apiClient.favorites.getAll();
         setFavorites(records as Favorite[]);
       } catch (error) {
         console.error("Error fetching favorites:", error);
@@ -31,24 +31,12 @@ const Favorites: React.FC<{ onSelect: (lat: number, lon: number) => void }> = ({
     };
 
     fetchFavorites();
-
-    // Subscribe to realtime changes
-    const unsub = pbClient.subscribeFavorites(user.id, (e: any) => {
-      if (e.action === "create") {
-        setFavorites((prev) => [e.record as unknown as Favorite, ...prev]);
-      } else if (e.action === "delete") {
-        setFavorites((prev) => prev.filter((f) => f.id !== e.record.id));
-      }
-    });
-
-    return () => {
-      if (typeof unsub === "function") unsub();
-    };
   }, [user]);
 
   const removeFavorite = async (id: string) => {
     try {
-      await pbClient.deleteFavorite(id);
+      await apiClient.favorites.delete(id);
+      setFavorites((prev) => prev.filter((f) => f.id !== id));
       toast.success("Removed from Favorites");
     } catch (error) {
       console.error("Error deleting favorite:", error);
