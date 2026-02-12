@@ -1,0 +1,26 @@
+services:
+  # Backend API Service
+  - type: web
+    name: windy-app-backend
+    env: node
+    buildCommand: cd backend && npm install && npx prisma generate
+    startCommand: cd backend && npm start
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: FRONTEND_URL
+        value: https://windy-app-frontend.onrender.com
+      - key: NODE_VERSION
+        value: 20
+
+  # Frontend Static Site
+  - type: web
+    name: windy-app-frontend
+    env: static
+    buildCommand: cd app && npm install && npm run build
+    staticPublishPath: app/dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://windy-app-backend.onrender.com

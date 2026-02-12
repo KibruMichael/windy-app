@@ -8,9 +8,19 @@ const { z } = require('zod');
 const app = express();
 const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-key-change-in-production';
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
-// Middleware
-app.use(cors());
+// Middleware - CORS configured for production
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    FRONTEND_URL
+  ].filter(Boolean),
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 
 // Auth middleware

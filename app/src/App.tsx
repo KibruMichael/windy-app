@@ -9,14 +9,13 @@ import {
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./App.css";
-import { AuthProvider, useAuth } from "./hooks/useAuth";
-import pb from "./lib/pocketbase";
-import pbClient from "./lib/pbClient";
+import { AuthProvider, useAuth } from "./hooks/useAuthNew";
+import apiClient from "./lib/apiClient";
 import { toast } from "sonner";
 import AuthPanel from "./components/AuthPanel";
-import CommentBox from "./components/CommentBox";
-import Rating from "./components/Rating";
-import Favorites from "./components/Favorites";
+import CommentBox from "./components/CommentBoxNew";
+import Rating from "./components/RatingNew";
+import Favorites from "./components/FavoritesNew";
 import { Star } from "lucide-react";
 
 // Fix Leaflet default marker icons
@@ -164,7 +163,7 @@ function AppContent() {
     if (!user || !weather) return;
     try {
       // avoid duplicates: check existing
-      const existing = await pbClient.getFavorites(user.id);
+      const existing = await apiClient.favorites.getAll();
       if (
         existing &&
         existing.find(
@@ -174,10 +173,9 @@ function AppContent() {
         toast.info("Already in Favorites");
         return;
       }
-      await pbClient.createFavorite(
+      await apiClient.favorites.create(
         weather.name,
-        `${position[0]},${position[1]}`,
-        user.id
+        `${position[0]},${position[1]}`
       );
       toast.success("Added to Favorites!");
     } catch (error) {
