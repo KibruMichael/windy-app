@@ -1,4 +1,4 @@
-# 🚀 WindyClone Deployment Guide (Render)
+# 🚀 Deployment Guide (Render)
 
 This guide details how to deploy your WindyClone application to Render using separate services for frontend and backend, with persistent PostgreSQL storage on Neon.
 
