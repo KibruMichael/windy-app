@@ -150,6 +150,36 @@ After both services are deployed:
 
 ---
 
+## 🎨 Design System Reference
+
+The app uses a comprehensive design system with:
+
+### Color Palette
+| Color | Hex | Usage |
+|-------|-----|-------|
+| Primary Background | `#121212` | Main background |
+| Secondary Background | `#1E1E1E` | Cards, panels |
+| Temperature Cold | `#3A9BDC` | Cold temperatures |
+| Temperature Warm | `#FF8C42` | Warm temperatures |
+| Wind | `#00CFCF` | Wind indicators |
+| Humidity | `#9B59B6` | Humidity display |
+| Sun | `#FFD700` | Sunrise/sunset |
+| Accent Primary | `#00f0ff` | Interactive elements |
+
+### Typography
+- **Font**: Inter (Google Fonts)
+- **Temperature**: 72px Bold
+- **Headings**: 32px Medium
+- **Body**: 16px Regular
+
+### Accessibility
+- Minimum 4.5:1 contrast ratio
+- Full keyboard navigation
+- ARIA labels for screen readers
+- Reduced motion support
+
+---
+
 ## 🔄 Updating & Git Sync
 
 ### Push Changes
@@ -220,6 +250,14 @@ npm install && npx prisma generate
 1. Verify `require('dotenv').config()` is at the top of `index.js`
 2. Check environment variables are set in Render dashboard
 3. Redeploy after adding environment variables
+
+### UI Styling Issues
+
+**Symptom**: Colors or fonts not displaying correctly
+**Solution**:
+1. Clear browser cache and hard refresh (Ctrl+Shift+R)
+2. Check that Inter font is loading from Google Fonts
+3. Verify CSS custom properties are defined in `:root`
 
 ---
 

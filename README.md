@@ -20,6 +20,47 @@ The application is built with a **React (Vite)** frontend and an **Express + Pri
 - **Responsive Design**: Dark-themed UI optimized for desktop and tablet
 - **Persistent Storage**: Data stored in Neon PostgreSQL (free tier: 0.5GB)
 
+## 🎨 Design System
+
+### Color Palette
+
+| Category | Color | Hex Code | Usage |
+|----------|-------|----------|-------|
+| Primary Background | Dark Gray | `#121212` | Main background |
+| Secondary Background | Lighter Gray | `#1E1E1E` | Cards, panels |
+| Temperature Cold | Blue | `#3A9BDC` | Cold temps, low values |
+| Temperature Warm | Orange | `#FF8C42` | Warm temps, high values |
+| Wind | Cyan | `#00CFCF` | Wind speed, direction |
+| Humidity | Purple | `#9B59B6` | Humidity percentage |
+| Sun/Daylight | Yellow | `#FFD700` | Sunrise/sunset times |
+| Primary Text | White | `#FFFFFF` | Headlines, values |
+| Secondary Text | Light Gray | `#B0B0B0` | Labels, descriptions |
+| Accent Primary | Cyan | `#00f0ff` | Interactive elements |
+| Accent Secondary | Blue | `#0072ff` | Gradients, buttons |
+
+### Typography
+
+- **Font Family**: Inter (Google Fonts)
+- **Current Temperature**: 72px, Bold
+- **Condition Label**: 32px, Medium
+- **Forecast Temps**: 24px, Regular
+- **Details**: 18px, Regular
+- **Comments**: 16px, Regular
+
+### Spacing
+
+- **Card Padding**: 24px
+- **Section Spacing**: 48px top/bottom
+- **Between Cards**: 16px
+- **Between Sections**: 32px
+
+### Micro-Interactions
+
+- **Transitions**: 0.2s ease for all state changes
+- **Hover States**: Glow effect + accent border
+- **Active States**: Accent color highlight
+- **Animations**: Float, shimmer, slide-in effects
+
 ## 🏗️ Architecture
 
 ```
@@ -45,7 +86,7 @@ The application is built with a **React (Vite)** frontend and an **Express + Pri
 | React | 19.2.0 | UI framework |
 | TypeScript | 5.9.3 | Type-safe JavaScript |
 | Vite | 7.2.4 | Build tool & dev server |
-| Tailwind CSS | 3.4.19 | Styling |
+| Tailwind CSS | 3.4.19 | Utility-first styling |
 | React Leaflet | 5.0.0 | Map integration |
 | Lucide React | 0.562.0 | Icons |
 | Axios | 1.13.4 | HTTP client |
@@ -148,6 +189,7 @@ windy-app/
 │   │   │   └── useAuth.tsx   # Authentication hook
 │   │   ├── lib/
 │   │   │   └── apiClient.ts  # API communication
+│   │   ├── App.css           # Design system styles
 │   │   ├── App.tsx           # Main component
 │   │   └── main.tsx          # Entry point
 │   ├── .env                  # Environment variables
@@ -214,6 +256,15 @@ See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) for detailed deployment instruc
    - Build: `npm install && npm run build`
    - Publish: `dist`
    - Env: `VITE_API_URL`
+
+## ♿ Accessibility
+
+- **Contrast Ratio**: Minimum 4.5:1 for text/background
+- **Keyboard Navigation**: Full tab order for all interactive elements
+- **Focus States**: Visible focus outlines on all controls
+- **Screen Readers**: ARIA labels and semantic HTML
+- **Reduced Motion**: Respects `prefers-reduced-motion` preference
+- **High Contrast**: Enhanced support for high contrast mode
 
 ## 🧩 Extending the Project
 
